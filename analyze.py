@@ -54,7 +54,7 @@ class Config:
         "pigmentation": (139, 69, 19),
     }
 
-    MODEL_NAME = "gemini-2.0-flash"
+    MODEL_NAME = "gemini-2.5-flash"
 
 # --------------------------------------------------
 # GEMINI CLIENT WITH IMPROVED PROMPTING
