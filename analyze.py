@@ -136,26 +136,31 @@ class DetectionNormalizer:
                 # Handle different data structures
                 if isinstance(d, dict):
                     conf = d.get("confidence", d.get("severity", 50))
+                    sub_type = d.get("subtype")
                     box = d.get("box") or d.get("bbox") or d.get("box_2d") or d.get("location")
-                   
+
                     # If no confidence provided, use default
                     if conf is None:
                         conf = 50
                         logger.warning(f"No confidence found for {label}, using default: 50")
-                   
+
                     # If no box provided, create default box for this concern area
                     if box is None:
                         logger.warning(f"No bounding box found for {label}, creating default box")
                         box = DetectionNormalizer._create_default_box(label_l, idx)
-                   
+
                     # Normalize box format
                     normalized_box = DetectionNormalizer._normalize_box(box)
-                   
+
                     if normalized_box:
-                        clean_items.append({
+                        item_data = {
                             "confidence": float(conf),
                             "box_pct": normalized_box
-                        })
+                        }
+                        # Add subtype if present (e.g., "crow_feet" for fine lines)
+                        if sub_type:
+                            item_data["subtype"] = sub_type
+                        clean_items.append(item_data)
                 else:
                     # If detection is just a string or number, create default entry
                     logger.warning(f"Unexpected format for {label}: {d}")
@@ -501,6 +506,26 @@ Use strict, evidence-based dermatological criteria for each condition:
 - Thin, shallow epidermal creases (<0.5mm)
 - Early photoaging signs
 - Periocular, forehead, perioral regions
+- When detecting FINE LINES:
+    a. If fine lines are located in the LATERAL PERIOCULAR REGION
+    (outer corners of the eyes, lateral canthus):
+    
+    ✓ Classify them as:
+        subtype = "crow's_feet"
+    
+    b. If fine lines are located in:
+    - Forehead
+    - Perioral region
+        ✓ Do NOT label as crow’s feet
+        ✓ Use subtype = "general_finelines"
+    
+    c. Crow’s feet MUST NOT be detected unless:
+    ✓ Fine lines are clearly visible at rest
+    ✓ Located laterally to the eye
+    ✓ Radiating or fan-shaped pattern
+    
+    4. Crow’s feet are ALWAYS a subtype of FINE LINES:
+    ✗ Do NOT create a separate "crows_feet" or "crow_feet" top-level label
  
 5. DARK CIRCLES (Periorbital Hyperpigmentation)
 - Brown, purple, or bluish discoloration
@@ -528,7 +553,7 @@ Use strict, evidence-based dermatological criteria for each condition:
 - Must show 15–20% contrast from baseline skin
  
 ═══════════════════════════════════════════════════════════
-STEP 4 — CLINICAL DETECTION THRESHOLDS
+STEP 5 — CLINICAL DETECTION THRESHOLDS
 ═══════════════════════════════════════════════════════════
 
 Use STRICT criteria:
@@ -552,7 +577,7 @@ HIGH CONFIDENCE (80–95%)
 ⚠️ If MEDIUM criteria are not fully met → downgrade to LOW or suppress.
 
 ═══════════════════════════════════════════════════════════
-STEP 5 — BOUNDING BOX REQUIREMENTS
+STEP 6 — BOUNDING BOX REQUIREMENTS
 ═══════════════════════════════════════════════════════════
 
 For EACH detected concern:
