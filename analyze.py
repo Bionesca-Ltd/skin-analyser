@@ -511,15 +511,13 @@ Use strict, evidence-based dermatological criteria for each condition:
     (outer corners of the eyes, lateral canthus):
     
     ✓ Classify them as:
-        subtype = "crow_feet"
+        subtype = "crow's_feet"
     
     b. If fine lines are located in:
     - Forehead
     - Perioral region
-    - Under-eye (infraorbital, NOT lateral)
-    
-    ✓ Do NOT label as crow’s feet
-    ✓ Use subtype = "general_finelines"
+        ✓ Do NOT label as crow’s feet
+        ✓ Use subtype = "general_finelines"
     
     c. Crow’s feet MUST NOT be detected unless:
     ✓ Fine lines are clearly visible at rest
