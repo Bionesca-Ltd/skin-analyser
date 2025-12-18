@@ -328,6 +328,7 @@
 # st.caption("Powered by Google Gemini AI • Built for Unfilter Platform")
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import tempfile
 import os
@@ -350,10 +351,29 @@ app = FastAPI(
     version="1.0"
 )
 
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with specific origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 def encode_image_to_base64(path: str) -> str:
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode("utf-8")
+
+
+@app.get("/")
+async def root():
+    return {"message": "Clinical Skin Analysis API", "status": "running"}
+
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
 
 
 @app.post("/analyze-skin")
